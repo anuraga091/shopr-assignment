@@ -2,7 +2,6 @@ import Head from 'next/head'
 import { Inter } from '@next/font/google'
 import Signup from './signup'
 import Login from './login';
-const finnhub = require('finnhub');
 import Link from 'next/link'
 import { useAuth } from '@/context/AuthContext';
 
@@ -11,15 +10,7 @@ const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
   const {user} = useAuth()
-  //const finnhub = require('finnhub');
-
-  // const api_key = finnhub.ApiClient.instance.authentications['api_key'];
-  // api_key.apiKey = "cfd98fpr01qj357esqt0cfd98fpr01qj357esqtg"
-  // const finnhubClient = new finnhub.DefaultApi()
-
-  // finnhubClient.stockCandles("AAPL", "D", 1590988249, 1591852249, (error, data, response) => {
-  //   console.log(data)
-  // });
+  
 
   return (
     <>

@@ -11,11 +11,12 @@ export default function Signup() {
     const [data, setData] = useState({
         email: '',
         password: '',
+        displayName: ''
     })
     const handleSignup = async (e) => {
         e.preventDefault()
         try {
-        await signup(data.email, data.password)
+        await signup(data.email, data.password, data.displayName)
         } catch (err) {
         console.log(err)
         }
@@ -35,6 +36,22 @@ export default function Signup() {
           <form className="mt-8 space-y-6" action="#" onSubmit={handleSignup}>
             <input type="hidden" name="remember" defaultValue="true" />
             <div className="-space-y-px rounded-md shadow-sm">
+              <div className="mb-4 space-y-6">
+                <label htmlFor="password" className="sr-only">
+                  Name
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  type="name"
+                  autoComplete="name"
+                  value={data.displayName}
+                  onChange={(e) => setData({...data, password: e.target.value,})}
+                  required
+                  className="relative block w-full appearance-none rounded-none rounded-b-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                  placeholder="Password"
+                />
+              </div>
               <div className="mb-4 space-y-6">
                 <label htmlFor="email-address" className="sr-only">
                   Email address
