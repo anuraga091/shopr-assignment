@@ -1,10 +1,13 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Fragment } from 'react'
 import { Disclosure, Menu, Transition } from '@headlessui/react'
-import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { Bars3Icon, BellIcon, XMarkIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 const finnhub = require('finnhub');
+import { useRouter } from 'next/router'
+import { useAuth } from '@/context/AuthContext';
+import Link from 'next/link';
 
-const user = {
+const user1 = {
   name: 'Tom Cook',
   email: 'tom@example.com',
   imageUrl:
@@ -14,7 +17,7 @@ const navigation = [
   { name: 'Dashboard', href: '#', current: true },
 ]
 const userNavigation = [
-  { name: 'Sign out', href: '#' },
+  { name: 'Sign out', href: 'signup' },
 ]
 
 function classNames(...classes) {
@@ -23,25 +26,34 @@ function classNames(...classes) {
 
 export async function getServerSideProps(){
   const res = await fetch(`https://finnhub.io/api/v1/stock/symbol?exchange=US&token=cfd98fpr01qj357esqt0cfd98fpr01qj357esqtg`)
-  const wholedata = await res.json()
-  const data = wholedata.slice(0,100)
+  const data  = await res.json()
+  //const data = wholedata.slice(0,100)
   return {
       props: {
         stockData: data,
       }
     }
-  // const res = await fetch(`https://finnhub.io/api/v1/stock/candle?symbol=IBM&resolution=D&from=1572651390&to=1575243390&token=cfd98fpr01qj357esqt0cfd98fpr01qj357esqtg`)
-  // const data = await res.json()
-  // return {
-  //     props: {
-  //       candleData: data,
-  //     }
-  //   }
-
 }
 
-export default function dashboard({stockData}) {
+export default function Dashboard({stockData}) {
+  const [search, setSearch] = useState("")
+  const [data, setData] = useState([])
+  const router = useRouter()
+  const {user, logout} = useAuth()
+
+  useEffect(() => {
+    setData(stockData)
+
+    return () => {}
+  },[stockData])
+  const slicedData = data.slice(0,100)
   
+  const searchData = slicedData.filter((obj,key) => obj.displaySymbol.toLowerCase().includes(search))
+  
+  const handleClick = (e) => {
+    const SYMBOL = e.target.innerText
+    router.push(`/dashboard/${SYMBOL}`)
+  }
   return (
     <>
       <div className="min-h-full">
@@ -92,8 +104,8 @@ export default function dashboard({stockData}) {
                       <Menu as="div" className="relative ml-3">
                         <div>
                           <Menu.Button className="flex max-w-xs items-center rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
-                            <span className="sr-only">Open user menu</span>
-                            <img className="h-8 w-8 rounded-full" src={user.imageUrl} alt="" />
+                            <span className="sr-only">Open user1 menu</span>
+                            <img className="h-8 w-8 rounded-full" src={user1.imageUrl} alt="" />
                           </Menu.Button>
                         </div>
                         <Transition
@@ -109,15 +121,16 @@ export default function dashboard({stockData}) {
                             {userNavigation.map((item) => (
                               <Menu.Item key={item.name}>
                                 {({ active }) => (
-                                  <a
+                                  <Link
                                     href={item.href}
                                     className={classNames(
                                       active ? 'bg-gray-100' : '',
                                       'block px-4 py-2 text-sm text-gray-700'
                                     )}
+                                    onClick={() => {logout()}}
                                   >
                                     {item.name}
-                                  </a>
+                                  </Link>
                                 )}
                               </Menu.Item>
                             ))}
@@ -160,11 +173,11 @@ export default function dashboard({stockData}) {
                 <div className="border-t border-gray-700 pt-4 pb-3">
                   <div className="flex items-center px-5">
                     <div className="flex-shrink-0">
-                      <img className="h-10 w-10 rounded-full" src={user.imageUrl} alt="" />
+                      <img className="h-10 w-10 rounded-full" src={user1.imageUrl} alt="" />
                     </div>
                     <div className="ml-3">
-                      <div className="text-base font-medium leading-none text-white">{user.name}</div>
-                      <div className="text-sm font-medium leading-none text-gray-400">{user.email}</div>
+                      <div className="text-base font-medium leading-none text-white">{user1.name}</div>
+                      <div className="text-sm font-medium leading-none text-gray-400">{user1.email}</div>
                     </div>
                     <button
                       type="button"
@@ -191,8 +204,19 @@ export default function dashboard({stockData}) {
             </>
           )}
         </Disclosure>
-
-        <main className="bg-white shadow">
+        
+        <main className="bg-white shadow ">
+          
+            <div className='flex justify-center'>
+              <input id="search" name="search" type="search" onChange={(e) => setSearch( e.target.value)}
+                    className="max-w-sm md:w-96 mt-2 self-center relative block appearance-none rounded rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                    placeholder="Search Stocks with their symbol" 
+              />
+              {/* <MagnifyingGlassIcon className='mt-3.5 bg-blue-700 w-6 h-6'/> */}
+              </div>
+          
+          
+          
           <div className="mx-auto max-w-7xl py-6 px-4 sm:px-6 lg:px-8">
               <div className="relative overflow-x-auto" >
                   <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
@@ -212,10 +236,10 @@ export default function dashboard({stockData}) {
                               </th>
                           </tr>
                       </thead>
-                      {stockData.length === 0 ? "Loading ...." 
+                      {searchData == {} || searchData == null || slicedData.searchData <= 0 ? "Loading ...." 
                         : 
-                        stockData.length > 0 && stockData != [] ?
-                        stockData.map((data, key) => (
+                        searchData.length > 0 && searchData!= [] ?
+                        searchData.map((data, key) => (
                           <tbody key={key}>
                               <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                                   <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
@@ -224,7 +248,7 @@ export default function dashboard({stockData}) {
                                   <td className="px-6 py-4">
                                       {data.description}
                                   </td>
-                                  <td className="px-6 py-4">
+                                  <td className="px-6 py-4 cursor-pointer" onClick={(e) => handleClick(e)}>
                                       {data.displaySymbol}
                                   </td>
                                   <td className="px-6 py-4">
