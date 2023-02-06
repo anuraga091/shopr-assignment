@@ -2,7 +2,7 @@
 1. Clone this repository using 'git clone'
 2. Do 'npm install' to install all the dependencies
 3. Run the development server using 'npm run dev'
-4. Open browser and run 'https://localhost:3000'
+4. Open browser and run 'http://localhost:3000'
 
 ## Routes
 1. '/' for home if user present then login page else signup page
