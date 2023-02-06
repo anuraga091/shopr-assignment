@@ -1,3 +1,28 @@
+## How to setup
+Clone this repository using 'git clone'
+Do 'npm install' to install all the dependencies
+Run the development server using 'npm run dev'
+Open browser and run 'https://localhost:3000'
+
+## Routes
+'/' for home if user present then login page else signup page
+'/login' for login page
+'/signup' for signup page
+'/dashboard' for Stocks table Note: This is a protected route and can't access if userdata is not available
+'/dashboard/${symbol}' for candlestick chart page Note: This is a protected route and can't access if userdata is not available
+
+##Functionality
+● The user will be able to log in to the application using Firebase 
+● The user should be able to search for stocks by symbol and add them to their portfolio. (Extra functionalities can be added like removing stocks from portfolio, showing portfolio in different page. Right now user can only add the stocks in portfolio and can see how many stocks have been added on cart logo, can see the stocks in console)
+● The stock data will be retrieved in real-time using REST 
+● The stock data should be displayed in a candle graph format, showing the opening, closing, highest and lowest price of the stock for a given time interval and will be updated every 5 sec
+● The user will be able to select the stock symbol and the time interval for the graph.
+● The user will be able to zoom in and out of the graph to view different time intervals
+● The graph will update in real-time as new data is received
+● The application is responsive and accessible, using Tailwind CSS for styling
+● Used Next.js to handle server-side rendering and routing.
+
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started
