@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react'
 import { Fragment } from 'react'
 import { Disclosure, Menu, Transition } from '@headlessui/react'
-import { Bars3Icon, BellIcon, XMarkIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import { Bars3Icon, BellIcon, XMarkIcon, PlusCircleIcon,MinusCircleIcon,ShoppingCartIcon } from '@heroicons/react/24/outline'
 const finnhub = require('finnhub');
 import { useRouter } from 'next/router'
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
+//import Portfolio from './portfolio';
+
+
 
 const user1 = {
   name: 'Tom Cook',
@@ -26,8 +29,8 @@ function classNames(...classes) {
 
 export async function getServerSideProps(){
   const res = await fetch(`https://finnhub.io/api/v1/stock/symbol?exchange=US&token=cfd98fpr01qj357esqt0cfd98fpr01qj357esqtg`)
-  const data  = await res.json()
-  //const data = wholedata.slice(0,100)
+  const wholedata  = await res.json()
+  const data = wholedata.slice(0,100)
   return {
       props: {
         stockData: data,
@@ -40,23 +43,68 @@ export default function Dashboard({stockData}) {
   const [data, setData] = useState([])
   const router = useRouter()
   const {user, logout} = useAuth()
+  const [selectedStocks, setSelectedStocks] = useState([])
+  const [selectedStocksSymbol, setSelectedStocksSymbol] = useState([])
+  
 
   useEffect(() => {
     setData(stockData)
-
-    return () => {}
   },[stockData])
-  const slicedData = data.slice(0,100)
+
+  useEffect(() => {
+    setSelectedStocks(selectedStocks)
+    setSelectedStocksSymbol(selectedStocksSymbol)
+  },[selectedStocks, selectedStocksSymbol])
   
-  const searchData = slicedData.filter((obj,key) => obj.displaySymbol.toLowerCase().includes(search))
   
   const handleClick = (e) => {
     const SYMBOL = e.target.innerText
     router.push(`/dashboard/${SYMBOL}`)
   }
+
+  const addToPortfolio = (e, key) => {
+    let symbol = data[key].displaySymbol
+    let clickedStock = data[key]
+    if(!selectedStocksSymbol.includes(symbol)){
+      const temp_selectedStocks = [...selectedStocks,clickedStock]
+      const temp_selectedStocksSymbol = [...selectedStocksSymbol,symbol]
+      setSelectedStocks(temp_selectedStocks)
+      setSelectedStocksSymbol(temp_selectedStocksSymbol)
+    }
+  }
+
+  const showAddedStocks = () => {
+    router.push("/portfolio")
+  }
+//To remove stocks from portfolio
+  // const removeFromPortfolio = (e, key) => {
+    
+  //   let symbol = data[key].displaySymbol
+  //   console.log('clicked', selectedStocksSymbol.includes(symbol))
+  //   if(selectedStocksSymbol.includes(symbol)){
+  //     let temp_SelectedStocks = selectedStocks
+  //     let temp_SelectedStocksSymbol = selectedStocksSymbol
+  //     const index = temp_SelectedStocks.findIndex(obj => obj.displaySymbol == symbol)
+  //     if(index > -1){
+  //         temp_SelectedStocks.splice(index,1)
+  //     } 
+  //     const symbolIndex = temp_SelectedStocksSymbol.indexOf(symbol)
+  //     if(index > -1){
+  //         temp_SelectedStocksSymbol.splice(symbolIndex,1)
+  //     }
+  //     setSelectedStocks(temp_SelectedStocks)
+  //     setSelectedStocksSymbol(temp_SelectedStocksSymbol)
+  //   }
+    
+  // }
+ 
+  const searchData = data.filter((obj,key) => obj.displaySymbol.toLowerCase().includes(search))
+  
+
   return (
     <>
-      <div className="min-h-full">
+      {!user ? "Loading ..." :
+      <div className="min-h-full ">
         <Disclosure as="nav" className="bg-gray-800">
           {({ open }) => (
             <>
@@ -176,16 +224,8 @@ export default function Dashboard({stockData}) {
                       <img className="h-10 w-10 rounded-full" src={user1.imageUrl} alt="" />
                     </div>
                     <div className="ml-3">
-                      <div className="text-base font-medium leading-none text-white">{user1.name}</div>
-                      <div className="text-sm font-medium leading-none text-gray-400">{user1.email}</div>
+                      <div className="text-sm font-medium leading-none text-gray-400">{user.email}</div>
                     </div>
-                    <button
-                      type="button"
-                      className="ml-auto flex-shrink-0 rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-                    >
-                      <span className="sr-only">View notifications</span>
-                      {/* <BellIcon className="h-6 w-6" aria-hidden="true" /> */}
-                    </button>
                   </div>
                   <div className="mt-3 space-y-1 px-2">
                     {userNavigation.map((item) => (
@@ -206,65 +246,143 @@ export default function Dashboard({stockData}) {
         </Disclosure>
         
         <main className="bg-white shadow ">
-          
-            <div className='flex justify-center'>
+            <div className='flex justify-evenly'>
               <input id="search" name="search" type="search" onChange={(e) => setSearch( e.target.value)}
                     className="max-w-sm md:w-96 mt-2 self-center relative block appearance-none rounded rounded-t-md border border-gray-300 px-3 py-2 text-gray-900 placeholder-gray-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
                     placeholder="Search Stocks with their symbol" 
               />
-              {/* <MagnifyingGlassIcon className='mt-3.5 bg-blue-700 w-6 h-6'/> */}
+              <div className='flex'>
+                  <ShoppingCartIcon className='mt-3.5 w-6 h-6'/>
+                  <p className='bg-red-700 rounded-full mb-5 mt-1 p-0.5'>{selectedStocks.length}</p>
               </div>
-          
-          
-          
-          <div className="mx-auto max-w-7xl py-6 px-4 sm:px-6 lg:px-8">
-              <div className="relative overflow-x-auto" >
-                  <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                      <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                          <tr>
-                              <th scope="col" className="px-6 py-3">
+            </div>
+         
+            
+            <div className="min-h-screen  py-6 px-4 sm:px-6 lg:px-8 sm ">
+              <div className="container space-y-8 text-sm mx-auto" >
+                <div className='space-y-2'>
+                  <div className='bg-white shadow-lg hover:shadow-xl rounded-md overflow-hidden'>
+                      <table className=" table flex table-auto leading-normal w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                          <tr className='hidden md:table-row'>
+                              <th className="px-6 py-3">
                                   Currency
                               </th>
-                              <th scope="col" className="px-6 py-3">
+                              <th  className="px-6 py-3">
                                   Description
                               </th>
-                              <th scope="col" className="px-6 py-3">
+                              <th className="px-6 py-3">
                                   Symbol
                               </th>
-                              <th scope="col" className="px-6 py-3">
+                              <th  className="px-6 py-3">
                                   Type
+                              </th>
+                              <th className="px-6 py-3">
+                                  Add to Portfolio
                               </th>
                           </tr>
                       </thead>
-                      {searchData == {} || searchData == null || slicedData.searchData <= 0 ? "Loading ...." 
-                        : 
-                        searchData.length > 0 && searchData!= [] ?
-                        searchData.map((data, key) => (
-                          <tbody key={key}>
-                              <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                      {searchData == {} || searchData == null || searchData.length <= 0 ? 
+                      <tbody className='flex-1 sm:flex-none'>
+                              <tr className="border-t first:border-t-0 flex p-1 md:p-3  md:table-row flex-col w-full flex-wrap bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                                   <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                      {data.currency}
+                                    <label class="text-xs text-gray-500 uppercase font-semibold md:hidden" for="">Currency</label>
+                                    <p class="">Loading ....</p>
+                                      
                                   </th>
                                   <td className="px-6 py-4">
-                                      {data.description}
+                                      <label class="text-xs text-gray-500 uppercase font-semibold md:hidden" for="">Description</label>
+                                      <p class="">Loading ....</p>
                                   </td>
-                                  <td className="px-6 py-4 cursor-pointer" onClick={(e) => handleClick(e)}>
-                                      {data.displaySymbol}
+                                  <td className="px-6 py-4" >
+                                     <label class="text-xs text-gray-500 uppercase font-semibold md:hidden" for="">Symbol</label>
+                                      <p class="">Loading ....</p>
                                   </td>
                                   <td className="px-6 py-4">
-                                      {data.type}
+                                      <label class="text-xs text-gray-500 uppercase font-semibold md:hidden" for="">Type</label>
+                                      <p class="">Loading ....</p>
+                                  </td>
+                                  <td className="px-6 py-4">
+                                      <label class="text-xs text-gray-500 uppercase font-semibold md:hidden" for="">Add to Portfolio</label>
+                                      <p class="">Loading ....</p>
+                                  </td>
+                              </tr>
+                          </tbody> 
+                        : 
+                        searchData.length > 0 && searchData!= [] ?
+                        searchData.map((data, key) => {
+                          const stockSelected = data.displaySymbol
+                          return(
+                            <tbody key={key} className='flex-1 sm:flex-none'>
+                              <tr className="border-t first:border-t-0 flex p-1 md:p-3  md:table-row flex-col w-full flex-wrap bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                  <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                    <label class="text-xs text-gray-500 uppercase font-semibold md:hidden" for="">Currency</label>
+                                    <p class="">{data.currency}</p>
+                                      
+                                  </th>
+                                  <td className="px-6 py-4">
+                                      <label class="text-xs text-gray-500 uppercase font-semibold md:hidden" for="">Description</label>
+                                      <p class="">{data.description}</p>
+                                  </td>
+                                  <td className="px-6 py-4" >
+                                     <label class="text-xs text-gray-500 uppercase font-semibold md:hidden" for="">Symbol</label>
+                                      <p onClick={(e) => handleClick(e)} class="cursor-pointer">{data.displaySymbol}</p>
+                                  </td>
+                                  <td className="px-6 py-4">
+                                      <label class="text-xs text-gray-500 uppercase font-semibold md:hidden" for="">Type</label>
+                                      <p class=""> {data.type}</p>
+                                  </td>
+                                  <td className="px-6 py-4">
+                                      <label class="text-xs text-gray-500 uppercase font-semibold md:hidden" for="">Add to Portfolio</label>
+                                      { selectedStocksSymbol.includes(stockSelected) ? 
+                                        <MinusCircleIcon key={key} style={{width: 24, height: 24}} /*onClick={(e) => removeFromPortfolio(e, key)}*//>
+                                        :
+                                        <PlusCircleIcon key={key} style={{width: 24, height: 24}} onClick={(e) => addToPortfolio(e, key)}/>
+                                      }
                                   </td>
                               </tr>
                           </tbody>
-                           ))
-                          : <p>No Data</p> }
+                          
+                           )})
+                          :  <tbody className='flex-1 sm:flex-none'>
+                              <tr className="border-t first:border-t-0 flex p-1 md:p-3  md:table-row flex-col w-full flex-wrap bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                                  <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                    <label class="text-xs text-gray-500 uppercase font-semibold md:hidden" for="">Currency</label>
+                                    <p class="">No Data</p>
+                                      
+                                  </th>
+                                  <td className="px-6 py-4">
+                                      <label class="text-xs text-gray-500 uppercase font-semibold md:hidden" for="">Description</label>
+                                      <p class="">No Data</p>
+                                  </td>
+                                  <td className="px-6 py-4" >
+                                     <label class="text-xs text-gray-500 uppercase font-semibold md:hidden" for="">Symbol</label>
+                                      <p class="">No Data</p>
+                                  </td>
+                                  <td className="px-6 py-4">
+                                      <label class="text-xs text-gray-500 uppercase font-semibold md:hidden" for="">Type</label>
+                                      <p class="">No Data</p>
+                                  </td>
+                                  <td className="px-6 py-4">
+                                      <label class="text-xs text-gray-500 uppercase font-semibold md:hidden" for="">Add to Portfolio</label>
+                                      <p class="">No Data</p>
+                                  </td>
+                              </tr>
+                          </tbody>  }
                       </table>
+                  </div>
+                      
+                </div>
+                  
               </div>
            
          
           </div>
+          
+          
         </main>
       </div>
+}
     </>
   )
 }
